@@ -1,20 +1,22 @@
 import { Injectable } from '@angular/core';
 import { UserManager, User } from 'oidc-client';
-import { environment } from '../environments/environment';
+
 import { Subject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { AuthContext } from '../model/auth-context';
+import { AuthContext } from '../../model/auth-context';
+import { environment } from '../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private _userManager: UserManager;
-  private _user: User;
+  private _user!: User | null;
   private _loginChangedSubject = new Subject<boolean>();
 
   loginChanged = this._loginChangedSubject.asObservable();
-  authContext: AuthContext;
+  authContext!: AuthContext;
 
   constructor(private _httpClient: HttpClient) {
     const stsSettings = {
@@ -53,18 +55,17 @@ export class AuthService {
     return this._userManager.signinRedirect();
   }
 
-  isLoggedIn(): Promise<boolean> {
-    return this._userManager.getUser().then(user => {
-      const userCurrent = !!user && !user.expired;
-      if (this._user !== user) {
-        this._loginChangedSubject.next(userCurrent);
-      }
-      if (userCurrent && !this.authContext) {
-        this.loadSecurityContext();
-      }
-      this._user = user;
-      return userCurrent;
-    });
+  async isLoggedIn(): Promise<boolean> {
+    const user = await this._userManager.getUser();
+    const userCurrent = !!user && !user.expired;
+    if (this._user !== user) {
+      this._loginChangedSubject.next(userCurrent);
+    }
+    if (userCurrent && !this.authContext) {
+      this.loadSecurityContext();
+    }
+    user ? this._user = user :  null;
+    return userCurrent;
   }
 
   completeLogin() {
