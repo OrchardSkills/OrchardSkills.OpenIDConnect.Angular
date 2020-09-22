@@ -1,9 +1,5 @@
 <nav>
     <div >
-        <span class="navbar-fill">
-            <button *ngIf="isLoggedIn"  routerLink="/projects">My Projects</button>
-            <button *ngIf="isAdmin()"  routerLink="/admin">Manage Projects</button>
-        </span>
         <span>
             <button *ngIf="!isLoggedIn"  (click)="login()">Login</button>
             <button *ngIf="isLoggedIn"  (click)="logout()">Logout</button>
