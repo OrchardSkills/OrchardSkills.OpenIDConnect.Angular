@@ -33,12 +33,12 @@ export class AuthService {
       // If the server does not allow CORS on the metadata endpoint, then these additional settings can be manually configured. 
       // These values can be found on the metadata endpoint of the provider:      
       // metadata: {
-      //   issuer: `${environment.stsAuthority}`,
-      //   authorization_endpoint: `${environment.stsAuthority}authorize?audience=projects-api`,
-      //   jwks_uri: `${environment.stsAuthority}.well-known/jwks.json`,
-      //   token_endpoint: `${environment.stsAuthority}oauth/token`,
-      //   userinfo_endpoint: `${environment.stsAuthority}userinfo`,
-      //   end_session_endpoint: `${environment.stsAuthority}v2/logout?client_id=${environment.clientId}&returnTo=${encodeURI(environment.clientRoot)}signout-callback`
+      //   issuer: `${environment.issuer}`,
+      //   authorization_endpoint: `${environment.authorizationEndpoint}?audience=projects-api`,
+      //   jwks_uri: `${environment.jwksUri}`,
+      //   token_endpoint: `${environment.tokenEndpoint}`,
+      //   userinfo_endpoint: `${environment.userinfoEndpoint}`,
+      //   end_session_endpoint: `${environment.stsAuthority}/logout?client_id=${environment.clientId}&returnTo=${encodeURI(environment.clientRoot)}signout-callback`
       // }
       // signingKeys (which is the keys property of the jwks_uri endpoint)
 
