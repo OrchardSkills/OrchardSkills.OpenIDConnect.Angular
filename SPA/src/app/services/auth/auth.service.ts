@@ -20,14 +20,18 @@ export class AuthService {
 
   constructor(private _httpClient: HttpClient) {
     const stsSettings = {
-      authority: environment.stsAuthority,
-      client_id: environment.clientId,
-      redirect_uri: `${environment.clientRoot}signin-callback`,
-      scope: 'openid profile projects-api',
-      response_type: 'code',
-      post_logout_redirect_uri: `${environment.clientRoot}signout-callback`,
-      automaticSilentRenew: true,
-      silent_redirect_uri: `${environment.clientRoot}assets/silent-callback.html`
+      // Required Settings
+      authority: environment.stsAuthority, // (string): The URL of the OIDC/OAuth2 provider
+      client_id: environment.clientId, // (string): Your client application's identifier as registered with the OIDC/OAuth2 provider.
+      redirect_uri: `${environment.clientRoot}signin-callback`, // (string): The redirect URI of your client application to receive a response from the OIDC/OAuth2 provider.
+      response_type: 'code', // (string, default: 'id_token'): The type of response desired from the OIDC/OAuth2 provider.
+      scope: 'openid profile projects-api', // (string, default: 'openid'): The scope being requested from the OIDC/OAuth2 provider
+
+      // Provider settings if CORS not supported on OIDC/OAuth2 provider metadata endpoint
+      // The authority URL setting is used to make HTTP requests to discover more information 
+      // about the OIDC/OAuth2 provider and populate a metadata property on the settings. 
+      // If the server does not allow CORS on the metadata endpoint, then these additional settings can be manually configured. 
+      // These values can be found on the metadata endpoint of the provider:      
       // metadata: {
       //   issuer: `${environment.stsAuthority}`,
       //   authorization_endpoint: `${environment.stsAuthority}authorize?audience=projects-api`,
@@ -36,6 +40,27 @@ export class AuthService {
       //   userinfo_endpoint: `${environment.stsAuthority}userinfo`,
       //   end_session_endpoint: `${environment.stsAuthority}v2/logout?client_id=${environment.clientId}&returnTo=${encodeURI(environment.clientRoot)}signout-callback`
       // }
+      // signingKeys (which is the keys property of the jwks_uri endpoint)
+
+      // Optional Settings
+      // clockSkew (number, default: 300): The window of time (in seconds) to allow the current time to deviate when validating id_token's iat, nbf, and exp values.
+      // loadUserInfo (boolean, default: true): Flag to control if additional identity data is loaded from the user info endpoint in order to populate the user's profile.
+      // filterProtocolClaims (boolean, default: true): Should OIDC protocol claims be removed from profile
+      post_logout_redirect_uri: `${environment.clientRoot}signout-callback`, // (string): The OIDC/OAuth2 post-logout redirect URI.
+      // popupWindowFeatures (string, default: 'location=no,toolbar=no,width=500,height=500,left=100,top=100'): The features parameter to window.open for the popup signin window.
+      // popupWindowTarget (string, default: '_blank'): The target parameter to window.open for the popup signin window.
+      silent_redirect_uri: `${environment.clientRoot}assets/silent-callback.html`, // (string): The URL for the page containing the code handling the silent renew.
+      automaticSilentRenew: true, // (boolean, default: false): Flag to indicate if there should be an automatic attempt to renew the access token prior to its expiration. The attempt is made as a result of the accessTokenExpiring event being raised.
+      // silentRequestTimeout (number, default: 10000): Number of milliseconds to wait for the silent renew to return before assuming it has failed or timed out.
+      // accessTokenExpiringNotificationTime (number, default: 60): The number of seconds before an access token is to expire to raise the accessTokenExpiring event.
+      // userStore: (default: session storage): Storage object used to persist User for currently authenticated user. E.g. userStore: new WebStorageStateStore({ store: window.localStorage })
+      // monitorSession [1.1.0]: (default: true): Will raise events for when user has performed a signout at the OP.
+      // checkSessionInterval: (default: 2000): Interval, in ms, to check the user's session.
+      // revokeAccessTokenOnSignout [1.2.1] (default: false): Will invoke the revocation endpoint on signout if there is an access token for the user.
+      // includeIdTokenInSilentRenew [1.4.0] (default: true): Flag to control if id_token is included as id_token_hint in silent renew calls.
+      // staleStateAge (default: 300): Number (in seconds) indicating the age of state entries in storage for authorize requests that are considered abandoned and thus can be cleaned up.
+      // extraQueryParams: (object): An object containing additional query string parameters to be including in the authorization request. E.g, when using Azure AD to obtain an access token an additional resource parameter is required. extraQueryParams: {resource:"some_identifier"}      
+
     };
     this._userManager = new UserManager(stsSettings);
     this._userManager.events.addAccessTokenExpired(_ => {
@@ -52,7 +77,7 @@ export class AuthService {
   }
 
   login() {
-    return this._userManager.signinRedirect();
+    return this._userManager.signinRedirect(); // Returns promise to trigger a redirect of the current window to the authorization endpoint.
   }
 
   async isLoggedIn(): Promise<boolean> {
@@ -69,7 +94,8 @@ export class AuthService {
   }
 
   completeLogin() {
-    return this._userManager.signinRedirectCallback().then(user => {
+    return this._userManager.signinRedirectCallback() // Returns promise to process response from the authorization endpoint. The result of the promise is the authenticated User
+    .then(user => {
       this._user = user;
       this._loginChangedSubject.next(!!user && !user.expired);
       return user;
@@ -77,17 +103,18 @@ export class AuthService {
   }
 
   logout() {
-    this._userManager.signoutRedirect();
+    this._userManager.signoutRedirect(); // Returns promise to trigger a redirect of the current window to the end session endpoint.
   }
 
   completeLogout() {
     this._user = null;
     this._loginChangedSubject.next(false);
-    return this._userManager.signoutRedirectCallback();
+    return this._userManager.signoutRedirectCallback(); // Returns promise to process response from the end session endpoint.
   }
 
   getAccessToken() {
-    return this._userManager.getUser().then(user => {
+    return this._userManager.getUser() // Returns promise to load the User object for the currently authenticated user.
+    .then(user => {
       if (!!user && !user.expired) {
         return user.access_token;
       }
