@@ -93,7 +93,10 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "spa:build"
+            "browserTarget": "spa:build",
+            "ssl": true,
+            "sslKey": "ssl/server.key",
+            "sslCert": "ssl/server.crt"
           },
           "configurations": {
             "production": {

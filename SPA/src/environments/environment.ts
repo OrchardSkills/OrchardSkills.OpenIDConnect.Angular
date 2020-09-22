@@ -5,9 +5,16 @@
 export const environment = {
   production: false,
   clientRoot: 'http://localhost:4200/',
+
+  //apiRoot: 'https://securingangularappscoursev2-api.azurewebsites.net/api/',
+  //stsAuthority: 'https://securingangularappscoursev2-sts.azurewebsites.net/',
+  //clientId: 'spa-client',
+
   apiRoot: 'https://securingangularappscoursev2-api.azurewebsites.net/api/',
-  stsAuthority: 'https://securingangularappscoursev2-sts.azurewebsites.net/',
-  clientId: 'spa-client',
+  stsAuthority: 'https://localhost:44300/',
+  clientId: 'client_id',
+  
+  
   issuer: 'http://localhost:44300/',
   authorizationEndpoint: 'https://localhost:44300/connect/token',
   tokenEndpoint: 'https://localhost:44300/connect/token',
